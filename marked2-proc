@@ -1,0 +1,182 @@
+#!/bin/sh
+
+#############################################################################
+# = This is a custom processor script for the Marked2 Markdown App.
+#############################################################################
+#
+# == Using an Alternative Markdown Processor
+#
+# Any Markdown flavor you can render from the command line can be used with
+# Marked. It needs to be able to take input on <stdin>, which is the same as
+# "piping" your Markdown to it on the command line, i.e.:
+#
+#     `cat myfile.md | myprocessor`
+#
+# It needs to return the resulting HTML on <stdout>.
+#
+# == Dynamically Bypassing Custom Processors
+#
+# If a custom processor returns "NOCUSTOM" on <stdout>, Marked will terminate the
+# custom processor and fall back to it's internal processor.  This allows to
+# create a custom processor that can decide whether or not it needs to run
+# using:
+# 
+# * the environment variables below,
+# * the document filename or extension,
+# * content matching or other logic
+#
+# == Environment Variables
+#
+# Marked runs the custom processor in its own shell, meaning standard
+# environment variables are not automatically passed or preserved. You can use
+# Marked's environment variables to augment your own scripts. Marked makes the
+# following variables available for use in your shell scripts:
+#
+# MARKED_ORIGIN:: 
+#     The location (base directory) of your primary working file
+#
+# PATH::
+#     Marked sets a path which includes default executable folders and appends
+#     the directory in the MARKED_ORIGIN variable. The defaults are:
+#
+#         `/Developer/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin`
+#
+#     You can add your own by setting the PATH variable as needed and appending
+#     or overwriting Marked's path. E.g.:
+#         
+#         PATH=/usr/local/yourdirectory:$PATH
+#
+# HOME::
+#     The home directory of the logged-in user. Python and other scripts which
+#     rely on the HOME variable being set will pick this up automatically, but
+#     its available for other uses in your scripts.
+# 
+# MARKED_EXT::
+#     The extension of the primary file being processed. This variable allows
+#     you to script different processes based on the type of file being viewed.
+#     For example, if $MARKED_EXT == 'md' then run your preferred Markdown
+#     processor, but if $MARKED_EXT == "adoc" run an AsciiDocotor processor.
+#
+# MARKED_PATH::
+#     This is the full UNIX path to the main file opened in Marked.
+#
+# MARKED_INCLUDES::
+#     A quoted, comma-separated list of the files Marked has included in the
+#     text being passed to the custom processor using the various include
+#     syntaxes supported by Marked.
+#
+# MARKED_PHASE::
+#     This will be set to either "PROCESS" or "PREPROCESS", allowing you to use
+#     a single script to handle both phases based on this variable.
+#
+# MARKED_CSS_PATH::
+#     The full path to the current stylesheet.
+#############################################################################
+
+#############################################################################
+# Only run as a processor, not a pre-processor
+#############################################################################
+[ "$MARKED_PHASE" = "PROCESS" ] || { echo "NOCUSTOM"; exit 0; }
+
+#############################################################################
+# Make missing filename variables in case they're needed
+#############################################################################
+# MARKED_FILE is the filename + extension without the root path
+#     /a/path/to/file.ext --> 'file.ext'
+#
+# MARKED_NAME is the filename without the extension or the root path
+#     /a/path/to/file.ext --> 'file'
+#
+# assert ( $MARKED_FILE == $MARKED_NAME & '.' & $MARKED_EXT );
+#############################################################################
+MARKED_FILE=${$MARKED_PATH##*/}
+MARKED_NAME=${MARKED_FILE%.*}
+
+#############################################################################
+# Process known script parameters
+#############################################################################
+while [ $# -gt 0 ]; do case $1 in
+    --rbenv ) RBENV_VERSION="$2"; unset RVM_VERSION; shift ;;
+    --rvm ) RVM_VERSION="$2"; unset RBENV_VERSION; shift ;;
+    --adoc-r ) ADOC_REQUIRES+=("--require $2"); shift ;;
+    --adoc-a ) ADOC_ATTRIBUTES+=("--attribute $2"); shift ;;
+    * ) UNKNOWN+=("$1") ;;
+esac; shift; done
+set -- ${UNKNOWN[@]}; unset UNKNOWN
+
+#############################################################################
+# Initialize ruby virtual environments for this shell if a version was given
+#############################################################################
+# NOTE: rbenv and RVM are not compatible. Only one option should be specified.
+# NOTE: RVM scripting recommendations at: https://rvm.io/workflow/scripting
+#############################################################################
+[ -n "$RBENV_VERSION" ] && 
+eval "$(rbenv init -)" && 
+rbenv shell "$RBENV_VERSION"  
+
+[ -n "$RVM_VERSION" ] && {
+{ [ -s "$HOME/.rvm/scripts/rvm" ] && source "$HOME/.rvm/scripts/rvm" ; } || 
+{ [ -s "/usr/local/rvm/scripts/rvm" ] && source "/usr/local/rvm/scripts/rvm" ; }
+} && rvm "$RVM_VERSION"
+
+#############################################################################
+# Determine what to run based on file extension
+#############################################################################
+case $MARKED_EXT in 
+
+    # AsciiDoc file types
+    # -------------------
+    adoc | asciidoc | asc | ad )
+
+        # Recover file attributes
+        # .......................
+        # Get mtime (last modification timestamp) for the open file,
+        #   formatted as AsciiDoctor would do it.
+        # Grab mtime once and then split it so that all attributes are consistent.
+        ADOC_MDT=$(stat -f "%Sm" -t "%F %T %z" $MARKED_PATH)
+        ADOC_MDATE=$(echo "$ADOC_MDT" | cut -d ' ' -f 1)
+        ADOC_MTIME=$(echo "$ADOC_MDT" | cut -d ' ' -f 2-)
+        ADOC_MYEAR=$(echo "$ADOC_MDATE" | cut -d : -f 1)
+
+        # Call Asciidoctor with a "restored" environment
+        # ..............................................
+        asciidoctor \
+            ${ADOC_REQUIRES[@]} \
+            --base-dir $MARKED_ORIGIN \
+            --attribute docdatetime="$ADOC_MDT" \
+            --attribute docdate="$ADOC_MDATE" \
+            --attribute doctime="$ADOC_MTIME" \
+            --attribute docyear="$ADOC_MYEAR" \
+            --attribute docfile="$MARKED_PATH" \
+            --attribute docdir="$MARKED_ORIGIN" \
+            --attribute docname="$MARKED_NAME" \
+            --attribute docfilesuffix=".$MARKED_EXT" \
+            --attribute user-home="$HOME" \
+            ${ADOC_ATTRIBUTES[@]} \
+            --quiet \
+            --backend html5 \
+            --o - -
+        ;;
+
+    # HTML file types
+    # ---------------
+    # Useful for seeing if there is an issue with the custom processor chain
+    # when rendering inside vs ouside of Marked2, or whether a rendering
+    # issue is with Marked2 itself or the user settings.
+    htm | html )
+
+        # HTML files are already processed,
+        #   but Marked2 seems to crash when using the default processor.
+        # Therefore, just give the file back unmolested.
+        cat -
+        ;;
+
+    # All other file types
+    # --------------------
+    *)
+        # Everything else uses the default processor
+        echo "NOCUSTOM"
+        ;;
+
+# end $MARKED_EXT case
+esac
