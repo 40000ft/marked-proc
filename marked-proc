@@ -74,9 +74,52 @@
 #############################################################################
 
 #############################################################################
+# Utility & convenience functions 
+#############################################################################
+# Marked takes the custom processor log on stderr
+echo_stderr () { >&2 echo "$@" ; }
+alias msg='echo_stderr'
+
+# Give status to the user
+#
+# The output can be seen by enabling the following settings in Marked:
+#   Preferences --> [X] "Debug mode" != "off"
+#   Help --> "Show Custom Processor Log"
+#   "Show Custom Processor Log" --> "Show STDERR"
+#
+# If the scripts exit with a non-zero value, 
+# the STDERR output will be shown in a pop-up dialog.
+log () { msg "[$1] ${0##*/}: ${@:2}" ; }
+
+info () { log "INFO" "$@" ; }
+warn () { log "WARN" "$@" ; }
+error () { log "ERROR" "$@" ; }
+
+# Force default processing, exit normally
+exit_nocustom () { echo "NOCUSTOM"; exit 0; }
+
+# Log a message if one was given, exit 1.
+# Non-zero return shows STDERR in a popup dialog if its not empty.
+exit_error () {
+    [ $# -gt 0 ] && error "$@"
+    exit 1
+}
+
+# Test for $1=<command> is in the path.
+# If not, exit with helpful error message.
+check_path_error () {
+    [ -n "$(command -v $1)" ] ||
+    exit_error "could not find '$1' in \$PATH!\n\n" \
+               "\$PATH=$PATH\n\n" \
+               "If '$1' is installed, add it to PATH with '--path <path>'" \
+               " in the Marked 'Preferences' --> 'Advanced' --> " \
+               "'Enable Custom Processor' --> 'Args:' text box."
+}
+
+#############################################################################
 # Only run as a processor, not a pre-processor
 #############################################################################
-[ "$MARKED_PHASE" = "PROCESS" ] || { echo "NOCUSTOM"; exit 0; }
+[ "$MARKED_PHASE" = "PROCESS" ] || exit_nocustom
 
 #############################################################################
 # Make missing filename variables in case they're needed
@@ -89,13 +132,14 @@
 #
 # assert ( $MARKED_FILE == $MARKED_NAME & '.' & $MARKED_EXT );
 #############################################################################
-MARKED_FILE=${$MARKED_PATH##*/}
+MARKED_FILE=${MARKED_PATH##*/}
 MARKED_NAME=${MARKED_FILE%.*}
 
 #############################################################################
 # Process known script parameters
 #############################################################################
 while [ $# -gt 0 ]; do case $1 in
+    --path ) export PATH=$2:$PATH; shift ;;
     --rbenv ) RBENV_VERSION="$2"; unset RVM_VERSION; shift ;;
     --rvm ) RVM_VERSION="$2"; unset RBENV_VERSION; shift ;;
     --adoc-r ) ADOC_REQUIRES+=("--require $2"); shift ;;
@@ -106,18 +150,49 @@ set -- ${UNKNOWN[@]}; unset UNKNOWN
 
 #############################################################################
 # Initialize ruby virtual environments for this shell if a version was given
+#
+# Asciidoctor is a delivered as a ruby gem.
+# Some systems may be using ruby virtual environments.
 #############################################################################
 # NOTE: rbenv and RVM are not compatible. Only one option should be specified.
 # NOTE: RVM scripting recommendations at: https://rvm.io/workflow/scripting
 #############################################################################
-[ -n "$RBENV_VERSION" ] && 
-eval "$(rbenv init -)" && 
-rbenv shell "$RBENV_VERSION"  
+[ -n "$RBENV_VERSION" ] && {
 
+    # Make sure 'rbenv' is in the path
+    check_path_error rbenv
+
+    # 'eval' will always return 0 here.
+    # If the 'rbenv init' fails here, the next rbenv command will fail too.
+    # Don't pollute the user's error log with another 
+    #   'rbenv: command not found' message.
+    eval "$(rbenv init - 2>/dev/null)" 
+
+    rbenv shell "$RBENV_VERSION" ||
+    exit_error "could not initialize rbenv to use version '$RBENV_VERSION'!\n\n" \
+               "Found installed versions:\n$(rbenv versions 2>/dev/null)"
+}
+
+RVM_USER_INSTALL="$HOME/.rvm/scripts/rvm" 
+RVM_ROOT_INSTALL="/usr/local/rvm/scripts/rvm" 
 [ -n "$RVM_VERSION" ] && {
-{ [ -s "$HOME/.rvm/scripts/rvm" ] && source "$HOME/.rvm/scripts/rvm" ; } || 
-{ [ -s "/usr/local/rvm/scripts/rvm" ] && source "/usr/local/rvm/scripts/rvm" ; }
-} && rvm "$RVM_VERSION"
+
+    {   [ -s "$RVM_USER_INSTALL" ] && 
+        source "$RVM_USER_INSTALL" &&
+        info "rvm loaded from '$RVM_USER_INSTALL'"
+    } || {
+        [ -s "$RVM_ROOT_INSTALL" ] && 
+        source "$RVM_ROOT_INSTALL" &&
+        info "rvm loaded from '$RVM_ROOT_INSTALL'"
+    } || 
+    exit_error "could not load RVM into the shell!\n\n" \
+               "Tried to source RVM scripts in the following order:\n" \
+               "\t$RVM_USER_INSTALL\n\t$RVM_ROOT_INSTALL\n\n"
+
+    rvm use "$RVM_VERSION" ||
+    exit_error "coud not initialize RVM to use version '$RVM_VERSION'!\n\n" \
+               "Found installed versions:\n$(rvm list 2>/dev/null)"
+} 
 
 #############################################################################
 # Determine what to run based on file extension
@@ -127,6 +202,9 @@ case $MARKED_EXT in
     # AsciiDoc file types
     # -------------------
     adoc | asciidoc | asc | ad )
+
+        # Make sure 'asciidoctor' is in the path
+        check_path_error asciidoctor
 
         # Recover file attributes
         # .......................
@@ -155,7 +233,7 @@ case $MARKED_EXT in
             ${ADOC_ATTRIBUTES[@]} \
             --quiet \
             --backend html5 \
-            --o - -
+            --o - - || exit_error
         ;;
 
     # HTML file types
@@ -175,7 +253,7 @@ case $MARKED_EXT in
     # --------------------
     *)
         # Everything else uses the default processor
-        echo "NOCUSTOM"
+        exit_nocustom
         ;;
 
 # end $MARKED_EXT case
