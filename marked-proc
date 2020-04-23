@@ -77,8 +77,7 @@
 # Utility & convenience functions 
 #############################################################################
 # Marked takes the custom processor log on stderr
-echo_stderr () { >&2 echo "$@" ; }
-alias msg='echo_stderr'
+msg () { echo "$@" >&2 ; }
 
 # Give status to the user
 #
