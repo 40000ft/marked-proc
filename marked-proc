@@ -140,6 +140,7 @@ MARKED_NAME=${MARKED_FILE%.*}
 #############################################################################
 while [ $# -gt 0 ]; do case $1 in
     --path ) export PATH="$2:$PATH"; shift ;;
+    --gem-path ) MY_GEM_PATH="$2:$MY_GEM_PATH"; shift ;; 
     --rbenv ) RBENV_VERSION="$2"; unset RVM_VERSION; shift ;;
     --rvm ) RVM_VERSION="$2"; unset RBENV_VERSION; shift ;;
     --adoc-r ) ADOC_REQUIRES+=("--require $2"); shift ;;
@@ -193,6 +194,15 @@ RVM_ROOT_INSTALL="/usr/local/rvm/scripts/rvm"
     exit_error "coud not initialize RVM to use version '$RVM_VERSION'!\n\n" \
                "Found installed versions:\n$(rvm list 2>/dev/null)"
 } 
+
+# Add user specifed paths to GEM_PATH
+# NOTE: Do this *after* initializing ruby virtual environments
+#       in case initialization clobbers the ruby environment variables
+[ -n "$MY_GEM_PATH" ] && {
+    [ -z "${GEM_PATH:+x}" ] &&
+    export GEM_PATH="${MY_GEM_PATH%:}" ||
+    export GEM_PATH="${MY_GEM_PATH}${GEM_PATH}"
+}
 
 #############################################################################
 # Determine what to run based on file extension
