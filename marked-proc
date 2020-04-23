@@ -203,6 +203,9 @@ RVM_ROOT_INSTALL="/usr/local/rvm/scripts/rvm"
                "Tried to source RVM scripts in the following order:\n" \
                "\t'$RVM_USER_INSTALL'\n\t'$RVM_ROOT_INSTALL'\n\n"
 
+    # Make sure rvm is in the path
+    check_path_error rvm
+
     # Set the selected RVM version for the shell
     rvm use "$RVM_VERSION" ||
     exit_error "coud not initialize RVM to use version '$RVM_VERSION'!\n\n" \
