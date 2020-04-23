@@ -20,7 +20,7 @@
 # custom processor and fall back to it's internal processor.  This allows to
 # create a custom processor that can decide whether or not it needs to run
 # using:
-# 
+#
 # * the environment variables below,
 # * the document filename or extension,
 # * content matching or other logic
@@ -32,7 +32,7 @@
 # Marked's environment variables to augment your own scripts. Marked makes the
 # following variables available for use in your shell scripts:
 #
-# MARKED_ORIGIN:: 
+# MARKED_ORIGIN::
 #     The location (base directory) of your primary working file
 #
 # PATH::
@@ -43,14 +43,14 @@
 #
 #     You can add your own by setting the PATH variable as needed and appending
 #     or overwriting Marked's path. E.g.:
-#         
+#
 #         PATH=/usr/local/yourdirectory:$PATH
 #
 # HOME::
 #     The home directory of the logged-in user. Python and other scripts which
 #     rely on the HOME variable being set will pick this up automatically, but
 #     its available for other uses in your scripts.
-# 
+#
 # MARKED_EXT::
 #     The extension of the primary file being processed. This variable allows
 #     you to script different processes based on the type of file being viewed.
@@ -74,7 +74,7 @@
 #############################################################################
 
 #############################################################################
-# Utility & convenience functions 
+# Utility & convenience functions
 #############################################################################
 # Marked takes the custom processor log on stderr
 msg () { echo "$@" >&2 ; }
@@ -86,7 +86,7 @@ msg () { echo "$@" >&2 ; }
 #   Help --> "Show Custom Processor Log"
 #   "Show Custom Processor Log" --> "Show STDERR"
 #
-# If the scripts exit with a non-zero value, 
+# If the scripts exit with a non-zero value,
 # the STDERR output will be shown in a pop-up dialog.
 log () { msg "[$1] ${0##*/}: ${@:2}" ; }
 
@@ -94,10 +94,10 @@ info () { log "INFO" "$@" ; }
 warn () { log "WARN" "$@" ; }
 error () { log "ERROR" "$@" ; }
 
-# Debug fuction executes the command given to it 
+# Debug fuction executes the command given to it
 # only if '--debug' option is given
 #
-# E.g. The following will only print when '--debug' is given. 
+# E.g. The following will only print when '--debug' is given.
 #       debug msg "This is a debug message"
 #       debug info "This is an [INFO] debug message"
 debug () { [ ${DEBUG:-0} -ne 0 ] && "$@" ; }
@@ -147,7 +147,7 @@ MARKED_NAME=${MARKED_FILE%.*}
 #############################################################################
 while [ $# -gt 0 ]; do case $1 in
     --path ) export PATH="$2:$PATH"; shift ;;
-    --gem-path ) MY_GEM_PATH="$2:$MY_GEM_PATH"; shift ;; 
+    --gem-path ) MY_GEM_PATH="$2:$MY_GEM_PATH"; shift ;;
     --rbenv ) RBENV_VERSION="$2"; unset RVM_VERSION; shift ;;
     --rvm ) RVM_VERSION="$2"; unset RBENV_VERSION; shift ;;
     --adoc-r ) ADOC_REQUIRES+=("--require $2"); shift ;;
@@ -175,9 +175,9 @@ set -- ${UNKNOWN[@]}; unset UNKNOWN
 
     # 'eval' will always return 0 here.
     # If the 'rbenv init' fails here, the next rbenv command will fail too.
-    # Don't pollute the user's error log with another 
+    # Don't pollute the user's error log with another
     #   'rbenv: command not found' message.
-    eval "$(rbenv init - 2>/dev/null)" 
+    eval "$(rbenv init - 2>/dev/null)"
 
     # Set the selected rbenv version for the shell
     rbenv shell "$RBENV_VERSION" ||
@@ -186,19 +186,19 @@ set -- ${UNKNOWN[@]}; unset UNKNOWN
 }
 
 # Intialize RVM if specified
-RVM_USER_INSTALL="$HOME/.rvm/scripts/rvm" 
-RVM_ROOT_INSTALL="/usr/local/rvm/scripts/rvm" 
+RVM_USER_INSTALL="$HOME/.rvm/scripts/rvm"
+RVM_ROOT_INSTALL="/usr/local/rvm/scripts/rvm"
 [ -n "$RVM_VERSION" ] && {
 
     # Load RVM into the shell from standard locations
-    {   [ -s "$RVM_USER_INSTALL" ] && 
+    {   [ -s "$RVM_USER_INSTALL" ] &&
         source "$RVM_USER_INSTALL" &&
         info "RVM loaded from '$RVM_USER_INSTALL'"
     } || {
-        [ -s "$RVM_ROOT_INSTALL" ] && 
+        [ -s "$RVM_ROOT_INSTALL" ] &&
         source "$RVM_ROOT_INSTALL" &&
         info "RVM loaded from '$RVM_ROOT_INSTALL'"
-    } || 
+    } ||
     exit_error "could not load RVM into the shell!\n\n" \
                "Tried to source RVM scripts in the following order:\n" \
                "\t'$RVM_USER_INSTALL'\n\t'$RVM_ROOT_INSTALL'\n\n"
@@ -210,7 +210,7 @@ RVM_ROOT_INSTALL="/usr/local/rvm/scripts/rvm"
     rvm use "$RVM_VERSION" ||
     exit_error "coud not initialize RVM to use version '$RVM_VERSION'!\n\n" \
                "Found installed versions:\n$(rvm list 2>/dev/null)"
-} 
+}
 
 # Add user specifed paths to GEM_PATH
 # NOTE: Do this *after* initializing ruby virtual environments
@@ -224,7 +224,7 @@ RVM_ROOT_INSTALL="/usr/local/rvm/scripts/rvm"
 #############################################################################
 # Determine what to run based on file extension
 #############################################################################
-case $MARKED_EXT in 
+case $MARKED_EXT in
 
     # AsciiDoc file types
     # -------------------
