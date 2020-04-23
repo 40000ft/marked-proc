@@ -166,6 +166,8 @@ set -- ${UNKNOWN[@]}; unset UNKNOWN
 # NOTE: rbenv and RVM are not compatible. Only one option should be specified.
 # NOTE: RVM scripting recommendations at: https://rvm.io/workflow/scripting
 #############################################################################
+
+# Intialize rbenv if specified
 [ -n "$RBENV_VERSION" ] && {
 
     # Make sure 'rbenv' is in the path
@@ -177,27 +179,31 @@ set -- ${UNKNOWN[@]}; unset UNKNOWN
     #   'rbenv: command not found' message.
     eval "$(rbenv init - 2>/dev/null)" 
 
+    # Set the selected rbenv version for the shell
     rbenv shell "$RBENV_VERSION" ||
     exit_error "could not initialize rbenv to use version '$RBENV_VERSION'!\n\n" \
                "Found installed versions:\n$(rbenv versions 2>/dev/null)"
 }
 
+# Intialize RVM if specified
 RVM_USER_INSTALL="$HOME/.rvm/scripts/rvm" 
 RVM_ROOT_INSTALL="/usr/local/rvm/scripts/rvm" 
 [ -n "$RVM_VERSION" ] && {
 
+    # Load RVM into the shell from standard locations
     {   [ -s "$RVM_USER_INSTALL" ] && 
         source "$RVM_USER_INSTALL" &&
-        info "rvm loaded from '$RVM_USER_INSTALL'"
+        info "RVM loaded from '$RVM_USER_INSTALL'"
     } || {
         [ -s "$RVM_ROOT_INSTALL" ] && 
         source "$RVM_ROOT_INSTALL" &&
-        info "rvm loaded from '$RVM_ROOT_INSTALL'"
+        info "RVM loaded from '$RVM_ROOT_INSTALL'"
     } || 
     exit_error "could not load RVM into the shell!\n\n" \
                "Tried to source RVM scripts in the following order:\n" \
-               "\t$RVM_USER_INSTALL\n\t$RVM_ROOT_INSTALL\n\n"
+               "\t'$RVM_USER_INSTALL'\n\t'$RVM_ROOT_INSTALL'\n\n"
 
+    # Set the selected RVM version for the shell
     rvm use "$RVM_VERSION" ||
     exit_error "coud not initialize RVM to use version '$RVM_VERSION'!\n\n" \
                "Found installed versions:\n$(rvm list 2>/dev/null)"
