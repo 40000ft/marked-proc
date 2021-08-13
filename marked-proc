@@ -177,7 +177,7 @@ esac; shift; done
 # NOTE: RVM scripting recommendations at: https://rvm.io/workflow/scripting
 #############################################################################
 
-# Initialize rbenv if specified
+# Initialize rbenv if a version was specified
 [ -n "$RBENV_VERSION" ] && {
 
     # Make sure 'rbenv' is in the path
@@ -195,7 +195,7 @@ esac; shift; done
                "Found installed versions: $(rbenv versions 2>/dev/null)"
 }
 
-# Initialize RVM if specified
+# Initialize RVM if a version was specified
 RVM_USER_INSTALL="$HOME/.rvm/scripts/rvm"
 RVM_ROOT_INSTALL="/usr/local/rvm/scripts/rvm"
 [ -n "$RVM_VERSION" ] && {
