@@ -157,7 +157,7 @@ while [ $# -gt 0 ]; do case $1 in
     --rvm ) RVM_VERSION="$2"; unset RBENV_VERSION; shift ;;
     --adoc-r ) ADOC_REQUIRES+=("--require $2"); shift ;;
     --adoc-a ) ADOC_ATTRIBUTES+=("--attribute $2"); shift ;;
-    --debug ) MP_DEBUG=1 ;;
+    --debug ) export MP_DEBUG=1 ;;
     * ) UNKNOWN+=("$1") ;;
 esac; shift; done
 set -- ${UNKNOWN[@]}; unset UNKNOWN
