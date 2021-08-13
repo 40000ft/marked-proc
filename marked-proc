@@ -99,7 +99,7 @@ error () { log "ERROR" "$@" ; }
 # E.g. The following will only print when '--debug' is given.
 #       debug msg "This is a debug message"
 #       debug info "This is an [INFO] debug message"
-debug () { [ ${DEBUG:-0} -ne 0 ] && "$@" ; }
+debug () { [ ${MP_DEBUG:-0} -ne 0 ] && "$@" ; }
 
 # Force default processing, exit normally
 exit_nocustom () { echo "NOCUSTOM"; exit 0; }
@@ -157,7 +157,7 @@ while [ $# -gt 0 ]; do case $1 in
     --rvm ) RVM_VERSION="$2"; unset RBENV_VERSION; shift ;;
     --adoc-r ) ADOC_REQUIRES+=("--require $2"); shift ;;
     --adoc-a ) ADOC_ATTRIBUTES+=("--attribute $2"); shift ;;
-    --debug ) DEBUG=1 ;;
+    --debug ) MP_DEBUG=1 ;;
     * ) UNKNOWN+=("$1") ;;
 esac; shift; done
 set -- ${UNKNOWN[@]}; unset UNKNOWN
