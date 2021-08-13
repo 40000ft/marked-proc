@@ -162,6 +162,10 @@ while [ $# -gt 0 ]; do case $1 in
 esac; shift; done
 set -- ${UNKNOWN[@]}; unset UNKNOWN
 
+# NOTE: All debug statements must occur after this comment because debug
+#       won't be enabled until the debug variable is set by processing
+#       the all the input arguments.
+
 #############################################################################
 # Initialize ruby virtual environments for this shell if a version was given
 #
