@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 #############################################################################
 # = This is a custom processor script for the Marked2 Markdown App.
