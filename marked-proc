@@ -232,6 +232,11 @@ RVM_ROOT_INSTALL="/usr/local/rvm/scripts/rvm"
                "Found installed versions: $(rvm list 2>/dev/null)"
 }
 
+# Change directory to the main document's location
+# so that any local settings can be picked up
+cd $MARKED_ORIGIN ||
+exit_error "Could not change directory to $MARKED_ORIGIN"
+
 # Add user specified ruby paths
 # NOTE: Do this *after* initializing ruby virtual environments
 #       in case initialization clobbers the ruby environment variables
