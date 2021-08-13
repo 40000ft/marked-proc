@@ -82,9 +82,8 @@ msg () { printf "%s\n" "$*" >&2 ; }
 # Give status to the user
 #
 # The output can be seen by enabling the following settings in Marked:
-#   Preferences --> [X] "Debug mode" != "off"
+#   Preferences --> Advanced --> [X] "Debug mode" != "off"
 #   Help --> "Show Custom Processor Log"
-#   "Show Custom Processor Log" --> "Show STDERR"
 #
 # If the scripts exit with a non-zero value,
 # the STDERR output will be shown in a pop-up dialog.
