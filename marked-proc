@@ -267,7 +267,7 @@ case $MARKED_EXT in
         # ..............................................
         asciidoctor \
             ${ADOC_REQUIRES[@]} \
-            --base-dir $MARKED_ORIGIN \
+            --base-dir "$MARKED_ORIGIN" \
             --attribute docdatetime="$ADOC_MDT" \
             --attribute docdate="$ADOC_MDATE" \
             --attribute doctime="$ADOC_MTIME" \
