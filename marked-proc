@@ -160,6 +160,7 @@ while [ $# -gt 0 ]; do case $1 in
     --adoc-r )      shift; ADOC_REQUIRES+=("--require $1") ;;
     --adoc-a )      shift; ADOC_ATTRIBUTES+=("--attribute $1") ;;
     --debug )       export MP_DEBUG=1 ;;
+    --debug-all )   export MP_DEBUG=1; export PS4=':$BASH_SOURCE:LINENO+'; set -x ;;
     * )             warn "Unknown argument: '$1'" ;;
 esac; shift; done
 
