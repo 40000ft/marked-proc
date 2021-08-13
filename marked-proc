@@ -115,8 +115,8 @@ exit_error () {
 # If not, exit with helpful error message.
 check_path_error () {
     [ -n "$(command -v $1)" ] ||
-    exit_error "Could not find '$1' in \$PATH!\n\n" \
-               "\$PATH=$PATH\n\n" \
+    exit_error "Could not find '$1' in \$PATH!  " \
+               "\$PATH=$PATH  " \
                "If '$1' is installed, add it to PATH with '--path <path>'" \
                " in the Marked 'Preferences' --> 'Advanced' --> " \
                "'Enable Custom Processor' --> 'Args:' text box."
@@ -189,8 +189,8 @@ esac; shift; done
 
     # Set the selected rbenv version for the shell
     rbenv shell "$RBENV_VERSION" ||
-    exit_error "Could not initialize rbenv to use version '$RBENV_VERSION'!\n\n" \
-               "Found installed versions:\n$(rbenv versions 2>/dev/null)"
+    exit_error "Could not initialize rbenv to use version '$RBENV_VERSION'!  " \
+               "Found installed versions: $(rbenv versions 2>/dev/null)"
 }
 
 # Initialize RVM if specified
@@ -207,17 +207,17 @@ RVM_ROOT_INSTALL="/usr/local/rvm/scripts/rvm"
         source "$RVM_ROOT_INSTALL" &&
         info "RVM loaded from '$RVM_ROOT_INSTALL'"
     } ||
-    exit_error "Could not load RVM into the shell!\n\n" \
-               "Tried to source RVM scripts in the following order:\n" \
-               "\t'$RVM_USER_INSTALL'\n\t'$RVM_ROOT_INSTALL'\n\n"
+    exit_error "Could not load RVM into the shell!  " \
+               "Tried to source RVM scripts in the following order: " \
+               "'$RVM_USER_INSTALL', '$RVM_ROOT_INSTALL'."
 
     # Make sure rvm is in the path
     check_path_error rvm
 
     # Set the selected RVM version for the shell
     rvm use "$RVM_VERSION" ||
-    exit_error "Could not initialize RVM to use version '$RVM_VERSION'!\n\n" \
-               "Found installed versions:\n$(rvm list 2>/dev/null)"
+    exit_error "Could not initialize RVM to use version '$RVM_VERSION'!  " \
+               "Found installed versions: $(rvm list 2>/dev/null)"
 }
 
 # Add user specified paths to GEM_PATH
