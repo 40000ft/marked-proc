@@ -155,6 +155,7 @@ while [ $# -gt 0 ]; do case $1 in
     --gem-path )    shift; MY_GEM_PATH="${1}${MY_GEM_PATH:+:${MY_GEM_PATH}}" ;;
     --gem-home )    shift; MY_GEM_HOME="$1" ;;
     --rbenv )       shift; RBENV_VERSION="$1"; unset RVM_VERSION ;;
+    --rvm-install ) shift; RVM_INSTALL="$1" ;;
     --rvm )         shift; RVM_VERSION="$1"; unset RBENV_VERSION ;;
     --adoc-r )      shift; ADOC_REQUIRES+=("--require $1") ;;
     --adoc-a )      shift; ADOC_ATTRIBUTES+=("--attribute $1") ;;
@@ -199,6 +200,14 @@ RVM_USER_INSTALL="$HOME/.rvm/scripts/rvm"
 RVM_ROOT_INSTALL="/usr/local/rvm/scripts/rvm"
 [ -n "$RVM_VERSION" ] && {
 
+    # Load RVM into the shell from specified location
+    [ -n "$RVM_INSTALL" ] && {
+        [ -s "$RVM_INSTALL" ] &&
+        source "$RVM_INSTALL" &&
+        info "RVM loaded from '$RVM_INSTALL'" ||
+        # give explicit error here, because user has specified it
+        exit_error "Could not load RVM into the shell from '$RVM_INSTALL'!"
+    } ||
     # Load RVM into the shell from standard locations
     {   [ -s "$RVM_USER_INSTALL" ] &&
         source "$RVM_USER_INSTALL" &&
@@ -208,9 +217,10 @@ RVM_ROOT_INSTALL="/usr/local/rvm/scripts/rvm"
         source "$RVM_ROOT_INSTALL" &&
         info "RVM loaded from '$RVM_ROOT_INSTALL'"
     } ||
-    exit_error "Could not load RVM into the shell!  " \
+    exit_error "Could not load RVM into the shell from a standard location!  " \
                "Tried to source RVM scripts in the following order: " \
-               "'$RVM_USER_INSTALL', '$RVM_ROOT_INSTALL'."
+               "'$RVM_USER_INSTALL', '$RVM_ROOT_INSTALL'.  " \
+               "Specify RVM script location with '--rvm-install'"
 
     # Make sure rvm is in the path
     check_path_error rvm
