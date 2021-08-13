@@ -144,6 +144,12 @@ MARKED_NAME=${MARKED_FILE%.*}
 #############################################################################
 # Process known script parameters
 #############################################################################
+
+# Reset positional parameters to respect quoting of user arguments
+# NOTE: Marked passes quoted arguments as literal quotes
+eval set -- "$*"
+
+# Process arguments
 while [ $# -gt 0 ]; do case $1 in
     --path ) export PATH="$2:$PATH"; shift ;;
     --gem-path ) MY_GEM_PATH="$2:$MY_GEM_PATH"; shift ;;
