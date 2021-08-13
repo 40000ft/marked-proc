@@ -49,7 +49,7 @@
 # HOME::
 #     The home directory of the logged-in user. Python and other scripts which
 #     rely on the HOME variable being set will pick this up automatically, but
-#     its available for other uses in your scripts.
+#     it's available for other uses in your scripts.
 #
 # MARKED_EXT::
 #     The extension of the primary file being processed. This variable allows
@@ -85,7 +85,7 @@ msg () { printf "%s\n" "$*" >&2 ; }
 #   Preferences --> Advanced --> [X] "Debug mode" != "off"
 #   Help --> "Show Custom Processor Log"
 #
-# If the scripts exit with a non-zero value,
+# If the script exits with a non-zero value,
 # the STDERR output will be shown in a pop-up dialog.
 log () { msg "[$1] ${0##*/}: ${@:2}" ; }
 
@@ -93,7 +93,7 @@ info () { log "INFO" "$@" ; }
 warn () { log "WARN" "$@" ; }
 error () { log "ERROR" "$@" ; }
 
-# Debug fuction executes the command given to it
+# Debug function executes the command given to it
 # only if '--debug' option is given
 #
 # E.g. The following will only print when '--debug' is given.
@@ -105,7 +105,7 @@ debug () { [ ${DEBUG:-0} -ne 0 ] && "$@" ; }
 exit_nocustom () { echo "NOCUSTOM"; exit 0; }
 
 # Log a message if one was given, exit 1.
-# Non-zero return shows STDERR in a popup dialog if its not empty.
+# Non-zero return shows STDERR in a pop-up dialog if it's not empty.
 exit_error () {
     [ $# -gt 0 ] && error "$@"
     exit 1
@@ -115,7 +115,7 @@ exit_error () {
 # If not, exit with helpful error message.
 check_path_error () {
     [ -n "$(command -v $1)" ] ||
-    exit_error "could not find '$1' in \$PATH!\n\n" \
+    exit_error "Could not find '$1' in \$PATH!\n\n" \
                "\$PATH=$PATH\n\n" \
                "If '$1' is installed, add it to PATH with '--path <path>'" \
                " in the Marked 'Preferences' --> 'Advanced' --> " \
@@ -166,7 +166,7 @@ set -- ${UNKNOWN[@]}; unset UNKNOWN
 # NOTE: RVM scripting recommendations at: https://rvm.io/workflow/scripting
 #############################################################################
 
-# Intialize rbenv if specified
+# Initialize rbenv if specified
 [ -n "$RBENV_VERSION" ] && {
 
     # Make sure 'rbenv' is in the path
@@ -180,11 +180,11 @@ set -- ${UNKNOWN[@]}; unset UNKNOWN
 
     # Set the selected rbenv version for the shell
     rbenv shell "$RBENV_VERSION" ||
-    exit_error "could not initialize rbenv to use version '$RBENV_VERSION'!\n\n" \
+    exit_error "Could not initialize rbenv to use version '$RBENV_VERSION'!\n\n" \
                "Found installed versions:\n$(rbenv versions 2>/dev/null)"
 }
 
-# Intialize RVM if specified
+# Initialize RVM if specified
 RVM_USER_INSTALL="$HOME/.rvm/scripts/rvm"
 RVM_ROOT_INSTALL="/usr/local/rvm/scripts/rvm"
 [ -n "$RVM_VERSION" ] && {
@@ -198,7 +198,7 @@ RVM_ROOT_INSTALL="/usr/local/rvm/scripts/rvm"
         source "$RVM_ROOT_INSTALL" &&
         info "RVM loaded from '$RVM_ROOT_INSTALL'"
     } ||
-    exit_error "could not load RVM into the shell!\n\n" \
+    exit_error "Could not load RVM into the shell!\n\n" \
                "Tried to source RVM scripts in the following order:\n" \
                "\t'$RVM_USER_INSTALL'\n\t'$RVM_ROOT_INSTALL'\n\n"
 
@@ -207,11 +207,11 @@ RVM_ROOT_INSTALL="/usr/local/rvm/scripts/rvm"
 
     # Set the selected RVM version for the shell
     rvm use "$RVM_VERSION" ||
-    exit_error "coud not initialize RVM to use version '$RVM_VERSION'!\n\n" \
+    exit_error "Could not initialize RVM to use version '$RVM_VERSION'!\n\n" \
                "Found installed versions:\n$(rvm list 2>/dev/null)"
 }
 
-# Add user specifed paths to GEM_PATH
+# Add user specified paths to GEM_PATH
 # NOTE: Do this *after* initializing ruby virtual environments
 #       in case initialization clobbers the ruby environment variables
 [ -n "$MY_GEM_PATH" ] && {
@@ -265,7 +265,7 @@ case $MARKED_EXT in
     # HTML file types
     # ---------------
     # Useful for seeing if there is an issue with the custom processor chain
-    # when rendering inside vs ouside of Marked2, or whether a rendering
+    # when rendering inside vs outside of Marked2, or whether a rendering
     # issue is with Marked2 itself or the user settings.
     htm | html )
 
