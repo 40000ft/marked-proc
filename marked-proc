@@ -223,11 +223,8 @@ RVM_ROOT_INSTALL="/usr/local/rvm/scripts/rvm"
 # Add user specified paths to GEM_PATH
 # NOTE: Do this *after* initializing ruby virtual environments
 #       in case initialization clobbers the ruby environment variables
-[ -n "$MY_GEM_PATH" ] && {
-    [ -z "${GEM_PATH:+x}" ] &&
-    export GEM_PATH="${MY_GEM_PATH%:}" ||
-    export GEM_PATH="${MY_GEM_PATH}${GEM_PATH}"
-}
+[ -n "$MY_GEM_PATH" ] &&
+    export GEM_PATH="${MY_GEM_PATH}${GEM_PATH:+:${GEM_PATH}}"
 
 #############################################################################
 # Determine what to run based on file extension
