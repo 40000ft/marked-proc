@@ -158,9 +158,8 @@ while [ $# -gt 0 ]; do case $1 in
     --adoc-r )      shift; ADOC_REQUIRES+=("--require $1") ;;
     --adoc-a )      shift; ADOC_ATTRIBUTES+=("--attribute $1") ;;
     --debug )       export MP_DEBUG=1 ;;
-    * )             UNKNOWN+=("$1") ;;
+    * )             warn "Unknown argument: '$1'" ;;
 esac; shift; done
-set -- ${UNKNOWN[@]}; unset UNKNOWN
 
 # NOTE: All debug statements must occur after this comment because debug
 #       won't be enabled until the debug variable is set by processing
