@@ -153,6 +153,7 @@ eval set -- "$*"
 while [ $# -gt 0 ]; do case $1 in
     --path )        shift; export PATH="${1}${PATH:+:${PATH}}" ;;
     --gem-path )    shift; MY_GEM_PATH="${1}${MY_GEM_PATH:+:${MY_GEM_PATH}}" ;;
+    --gem-home )    shift; MY_GEM_HOME="$1" ;;
     --rbenv )       shift; RBENV_VERSION="$1"; unset RVM_VERSION ;;
     --rvm )         shift; RVM_VERSION="$1"; unset RBENV_VERSION ;;
     --adoc-r )      shift; ADOC_REQUIRES+=("--require $1") ;;
@@ -220,11 +221,14 @@ RVM_ROOT_INSTALL="/usr/local/rvm/scripts/rvm"
                "Found installed versions: $(rvm list 2>/dev/null)"
 }
 
-# Add user specified paths to GEM_PATH
+# Add user specified ruby paths
 # NOTE: Do this *after* initializing ruby virtual environments
 #       in case initialization clobbers the ruby environment variables
 [ -n "$MY_GEM_PATH" ] &&
     export GEM_PATH="${MY_GEM_PATH}${GEM_PATH:+:${GEM_PATH}}"
+
+[ -n "$MY_GEM_HOME" ] &&
+    export GEM_HOME="$MY_GEM_HOME"
 
 #############################################################################
 # Determine what to run based on file extension
