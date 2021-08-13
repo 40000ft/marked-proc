@@ -76,7 +76,7 @@
 #############################################################################
 # Utility & convenience functions
 #############################################################################
-# Marked takes the custom processor log on stderr
+# Marked takes the custom processor log on STDERR
 msg () { printf "%s\n" "$*" >&2 ; }
 
 # Give status to the user
